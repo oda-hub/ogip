@@ -1,0 +1,14 @@
+language: python
+python:
+  - "3.6"  
+  - "3.7"
+  - "3.8"
+install:
+  - pip install pytest mypy pylint pytest-cov codecov
+  - pip install -e '.[testing]'
+script:
+  - mypy ogip
+  - pylint -E ogip
+  - pytest --cov=./
+after_success:
+  - codecov
