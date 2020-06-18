@@ -1,6 +1,6 @@
 # Python library to read, write, and validate "OGIP" files
 
-* aims to support OGIP formats, especially [OGIP/92-007 (Spectral File Format)](https://heasarc.gsfc.nasa.gov/docs/heasarc/ofwg/docs/spectra/ogip_92_007/node5.html) ([pdf](https://heasarc.gsfc.nasa.gov/docs/heasarc/ofwg/docs/spectra/ogip_92_007.pdf))
+* aims to support OGIP formats, especially [OGIP/92-007 (Spectral File Format)](https://heasarc.gsfc.nasa.gov/docs/heasarc/ofwg/docs/spectra/ogip_92_007/node5.html) and [OGIP Calibration Memo CAL/GEN/92-002](https://heasarc.gsfc.nasa.gov/docs/heasarc/caldb/docs/memos/cal_gen_92_002/cal_gen_92_002.html)
 * does not aim to implement the strictest form of the standard, instead trying to understand the content with a well-defined process
 * relies only on [astropy](https://www.astropy.org/)
 
