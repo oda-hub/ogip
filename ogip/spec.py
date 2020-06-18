@@ -66,7 +66,24 @@ class PHAI(Spectrum):
                     fits.Column(name='QUALITY', array=self._quality, format='1I'),
                 ],
                 header=fits.Header(cards=dict(
-                                      EXTNAME="SPECTRUM",
+                                      EXTNAME="SPECTRUM", # - the name (i.e. type) of the extension
+                                      TELESCOP="", # - the "telescope" (i.e. mission/satellite name).
+                                      INSTRUME="", #- the instrument/detector.
+                                      #FILTER - the instrument filter in use (if any)
+                                      AREASCAL=1.,
+                                      BACKSCAL=1.,
+                                      EXPOSURE=self._exposure, # the integration time (in seconds) for the PHA data (assumed to be corrected for deadtime, data drop-outs etc. )
+                                      BACKFILE="", #- the name of the corresponding background file (if any)
+                                      #CORRFILE - the name of the corresponding correction file (if any)
+                                      #CORRSCAL - the correction scaling factor.
+                                      RESPFILE="", # - the name of the corresponding (default) redistribution matrix file (RMF; see George et al. 1992a).
+                                      ANCRFILE="", # - the name of the corresponding (default) ancillary response file (ARF; see George et al. 1992a).
+                                      HDUCLASS="OGIP", # - should contain the string "OGIP" to indicate that this is an OGIP style file.
+                                      HDUCLAS1="SPECTRUM", # - should contain the string "SPECTRUM" to indicate this is a spectrum.
+                                      HDUVERS="1.2.1", #- the version number of the format (this document describes version 1.2.1)
+                                      #POISSERR #- whether Poissonian errors are appropriate to the data (see below).
+                                      #CHANTYPE #- whether the channels used in the file have been corrected in anyway (see below).
+                                      DETCHANS=len(self._rate), #- the total number of detector channels available.
                                   )),
             )
 
@@ -76,7 +93,7 @@ class PHAI(Spectrum):
         fits.HDUList([
                 fits.PrimaryHDU(),
                 self.spectrum_hdu,
-            ]).writeto(fn, clobber=True)
+            ]).writeto(fn, overwrite=True)
 
 
 class PHAII(Spectrum):
@@ -129,7 +146,7 @@ class RMF:
                 fits.PrimaryHDU(),
                 self.ebounds_hdu,
                 self.matrix_hdu,
-            ]).writeto(fn, clobber=True)
+            ]).writeto(fn, overwrite=True)
 
 class ARF:
     pass

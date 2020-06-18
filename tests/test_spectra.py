@@ -59,6 +59,7 @@ def test_read_xspec():
     import xspec
 
     synth_phaI().to_fits("phaI.fits")
+    synth_rmf().to_fits("rmf.fits")
 
     s = xspec.Spectrum("phaI.fits")
 
