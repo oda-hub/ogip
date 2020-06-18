@@ -9,6 +9,6 @@ if {'pytest', 'test', 'ptr'}.intersection(sys.argv):
 
 setup(description="ogip",
       long_description=open('README.md').read(),
-      version='0.1.1-dev0',
+      version='0.1.1',
       include_package_data=True,
       setup_requires=setup_requires)
