@@ -14,7 +14,7 @@ def spec():
 @click.argument("FN")
 def inspect(fn):
 
-    S = ogip.spec.OGIPSpectrum.from_file_name(fn)
+    S = ogip.spec.Spectrum.from_file_name(fn)
 
     print(S.to_long_string())
 

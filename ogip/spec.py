@@ -65,6 +65,7 @@ class PHAI(Spectrum):
                     fits.Column(name='SYS_ERR', array=self._sys_err, format='1E'),
                     fits.Column(name='QUALITY', array=self._quality, format='1I'),
                 ],
+                # https://heasarc.gsfc.nasa.gov/docs/heasarc/ofwg/docs/spectra/ogip_92_007/node6.html
                 header=fits.Header(cards=dict(
                                       EXTNAME="SPECTRUM", # - the name (i.e. type) of the extension
                                       TELESCOP="", # - the "telescope" (i.e. mission/satellite name).
@@ -101,6 +102,8 @@ class PHAII(Spectrum):
 
 
 class RMF:
+    _telescop="not-a-telescope"
+    _instrume="not-an-instrument"
 
     def __init__(self):
         pass
@@ -124,7 +127,42 @@ class RMF:
                     fits.Column(name='ENERG_HI', array=self._energ_hi, format='1E'),
                 ],
                 header=fits.Header(cards=dict(
-                                      EXTNAME="MATRIX"
+                    # https://heasarc.gsfc.nasa.gov/docs/heasarc/caldb/docs/memos/cal_gen_92_002/cal_gen_92_002.html#tth_sEc7.1.1
+                                      EXTNAME = 'MATRIX', #           / name of this binary table extension
+                                      #BITPIX  =                    8 / 8-bit bytes
+                                      #NAXIS   =                    2 / 2-dimensional binary table
+                                      #NAXIS1  =                   34 / width of table in bytes
+                                      #NAXIS2  =                 1180 / number of rows in table
+                                      #PCOUNT  =              1031160 / Number of bytes acumulated in heap
+                                      #GCOUNT  =                    1 / one data group (required keyword)
+                                      #TFIELDS =                    6 / number of fields in each row
+                                      #TTYPE1  = 'ENERG_LO'           / label for field   1
+                                      #TFORM1  = 'E       '           / data format of field: 4-byte REAL
+                                      #TUNIT1  = 'keV     '           / physical unit of field
+                                      #TTYPE2  = 'ENERG_HI'           / label for field   2
+                                      #TFORM2  = 'E       '           / data format of field: 4-byte REAL
+                                      #TUNIT2  = 'keV     '           / physical unit of field
+                                      #TTYPE3  = 'N_GRP   '           / label for field   3
+                                      #TFORM3  = 'I       '           / data format of field: 2-byte INTEGER
+                                      #TTYPE4  = 'F_CHAN  '           / label for field   4
+                                      #TFORM4  = 'PI(2)   '           / data format of field: variable length array
+                                      #TTYPE5  = 'N_CHAN  '           / label for field   5
+                                      #TFORM5  = 'PI(2)   '           / data format of field: variable length array
+                                      #TTYPE6  = 'MATRIX  '           / label for field   6
+                                      #TFORM6  = 'PE(418) '           / data format of field: variable length array
+                                      TLMIN4=0, #/ First legal channel number
+                                      TLMAX4=len(self._e_min), #/ Highest legal channel number
+                                      TELESCOP=self._telescop, #          / mission/satellite name
+                                      INSTRUME=self._instrume, #           / instrument/detector
+                                      #FILTER  = 'NONE    '           / filter information
+                                      CHANTYPE='PI', #           / Type of channels (PHA, PI etc)
+                                      DETCHANS=len(self._e_min), # / Total number of detector PHA channels
+                                      LO_THRES=1.00E-07, # / Lower probability density threshold for matrix
+                                      HDUCLASS='OGIP', #/KeywordinformationforCaltoolsSoftware.
+                                      HDUCLAS1='RESPONSE', #/KeywordinformationforCaltoolsSoftware.
+                                      HDUCLAS2='RSP_MATRIX', #/KeywordinformationforCaltoolsSoftware.
+                                      HDUVERS='1.3.0', #/KeywordinformationforCaltoolsSoftware.
+                                      HDUCLAS3='DETECTOR', #/KeywordinformationforCaltoolsSoftware.
                                   )),
             )
     
@@ -135,7 +173,19 @@ class RMF:
                     fits.Column(name='E_MAX', array=self._e_max, format='1E'),
                 ],
                 header=fits.Header(cards=dict(
-                                      EXTNAME="MATRIX"
+                                      EXTNAME='EBOUNDS', #           / name of this binary table extension
+                                      TLMIN1=0, #/ First legal channel number
+                                      TLMAX1=len(self._e_min), #                  511 / Highest legal channel number
+                                      TELESCOP=self._telescop, #          / mission/satellite name
+                                      INSTRUME=self._instrume, #           / instrument/detector
+                                      #FILTER  = 'NONE    '           / filter information
+                                      CHANTYPE='PI', #           / Type of channels (PHA, PI etc)
+                                      DETCHANS=len(self._e_min), # / Total number of detector PHA channels
+                                      #SMOOTHED=                    0 / 0 = raw, 1-12 = smooth, -1 = ep-lin, -2 = mean-
+                                      HDUCLASS='OGIP', # / Keyword information for Caltools Software.
+                                      HDUCLAS1='RESPONSE', # / Keyword information for Caltools Software.
+                                      HDUCLAS2='EBOUNDS', # / Keyword information for Caltools Software.
+                                      HDUVERS ='1.2.0', # / Keyword information for Caltools Software.
                                   )),
             )
     
