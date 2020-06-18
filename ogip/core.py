@@ -14,5 +14,11 @@ def open_something(fn, allow_many=False):
         except Exception as e:
             logger.debug(e)
 
-    return options
+    if allow_many:
+        return options
+    else:
+        if len(options) > 0:
+            return options[0]
+
+
 

@@ -1,6 +1,7 @@
 import click
 
 import ogip.spec
+import ogip.core
 
 @click.group()
 def cli():
@@ -20,9 +21,10 @@ def inspect(fn):
 
 
 @spec.command()
-@click.argument("input_fn", help="read and write, ensuring the format")
-@click.argument("output_fn", help="read and write, ensuring the format")
+@click.argument("input_fn")
+@click.argument("output_fn")
 def fix(input_fn, output_fn):
+    """read and write, ensuring the format"""
 
     S = ogip.spec.Spectrum.from_file_name(input_fn)
 

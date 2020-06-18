@@ -16,21 +16,50 @@ class Spectrum:
 
     ###
 
+class Readable:
+    def from_file_name(cls, fn):
+        for n, m in cls.__dict__.items():
+            if n.startswith('from_file_name_'):
+                try:
+                    return m.__func__(fn)
+                except Exception as e:
+                    logger.debug("failed to read with %s.%s %s: %s", cls.__name__, n, m, e)
+
+        raise Exception("failed to read with any method")
+
 class PHAI(Spectrum):
+
+    @staticmethod
+    def from_file_name(fn):
+        return Readable.from_file_name(PHAI, fn)
+
+    @staticmethod
+    def from_file_name_osa(fn):
+        f = fits.open(fn)
+        for e in f:
+            try:
+                return PHAI.from_arrays(
+                            exposure=e.header['EXPOSURE'],
+                            rate=e.data['RATE'],
+                            stat_err=e.data['STAT_ERR'],
+                            sys_err=e.data['SYS_ERR'],
+                        )
+            except Exception as ex:
+                logger.debug("failed to read from %s: %s", e, ex)
+
+        raise Exception("unable to read from any extension")
+
     @staticmethod
     def from_file_name_normal(fn):
         f = fits.open(fn)
-
         return PHAI.from_arrays(
-                    expsoure=f['SPECTRUM'].header['EXPOSURE'],
+                    exposure=f['SPECTRUM'].header['EXPOSURE'],
                     rate=f['SPECTRUM'].data['RATE'],
                     stat_err=f['SPECTRUM'].data['STAT_ERR'],
                     sys_err=f['SPECTRUM'].data['SYS_ERR'],
                 )
     
-    @staticmethod
-    def from_file_name(fn):
-        return PHAI.from_file_name_normal(fn)
+
 
     @staticmethod
     def from_arrays(exposure, rate=None, stat_err=None, sys_err=None, quality=None, counts=None):
@@ -108,6 +137,13 @@ class PHAI(Spectrum):
                 self.spectrum_hdu,
             ]).writeto(fn, overwrite=True)
 
+    @property
+    def total_counts(self):
+        return np.nansum(self._rate)
+
+    def to_long_string(self):
+        return f"{self.__class__.__name__}: exposure {self._exposure} s, total count/s {self.total_counts}, {len(self._rate)} channels "
+
 
 class PHAII(Spectrum):
     pass
@@ -116,9 +152,25 @@ class PHAII(Spectrum):
 class RMF:
     _telescop="not-a-telescope"
     _instrume="not-an-instrument"
+    
+    def to_long_string(self):
+        return f"{self.__class__.__name__}: {len(self._e_min)} x {len(self._energ_lo)}  channels "
 
-    def __init__(self):
-        pass
+    @staticmethod
+    def from_file_name(fn):
+        return Readable.from_file_name(RMF, fn)
+    
+    @staticmethod
+    def from_file_name_osaisgri(fn):
+        f = fits.open(fn)
+
+        return RMF.from_arrays(
+                    energ_lo=f['ISGR-RMF.-RSP'].data['ENERG_LO'],
+                    energ_hi=f['ISGR-RMF.-RSP'].data['ENERG_HI'],
+                    matrix=f['ISGR-RMF.-RSP'].data['MATRIX'],
+                    e_min=f['ISGR-EBDS-MOD'].data['E_MIN'],
+                    e_max=f['ISGR-EBDS-MOD'].data['E_MAX'],
+                )
     
     @staticmethod
     def from_file_name_normal(fn):
@@ -127,14 +179,10 @@ class RMF:
         return RMF.from_arrays(
                     energ_lo=f['MATRIX'].data['ENERG_LO'],
                     energ_hi=f['MATRIX'].data['ENERG_HI'],
-                    matrix=f['MATRIX'].data['MATRIX'],
+                    matrix=np.vstack(f['MATRIX'].data['MATRIX']),
                     e_min=f['EBOUNDS'].data['E_MIN'],
                     e_max=f['EBOUNDS'].data['E_MAX'],
                 )
-    
-    @staticmethod
-    def from_file_name(fn):
-        return RMF.from_file_name_normal(fn)
 
     @staticmethod
     def from_arrays(energ_lo, energ_hi, matrix, e_min, e_max):
