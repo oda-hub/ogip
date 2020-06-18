@@ -66,7 +66,7 @@ class PHAI(Spectrum):
                     fits.Column(name='QUALITY', array=self._quality, format='1I'),
                 ],
                 header=fits.Header(cards=dict(
-                                      EXTNAME="SPECTRUM"
+                                      EXTNAME="SPECTRUM",
                                   )),
             )
 
