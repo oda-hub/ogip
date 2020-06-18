@@ -22,7 +22,7 @@ def synth_phaI():
     phaI = ogip.spec.PHAI.from_arrays(
                 1.,
                 rate=r,
-                stat_err=r**0.5
+                stat_err=r/100.
             )
 
     return phaI
@@ -41,12 +41,16 @@ def synth_rmf():
     rmf = ogip.spec.RMF.from_arrays(
                 energ_lo = elh[:-1],
                 energ_hi = elh[1:],
-                matrix = matrix,
+                matrix = np.transpose(matrix),
                 e_min = eb[:-1],
                 e_max = eb[1:],
             )
 
     return rmf
+
+
+def test_bad_arrays():
+    pass
 
 def test_from_arrays():
 

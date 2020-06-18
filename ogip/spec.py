@@ -52,13 +52,12 @@ class PHAI(Spectrum):
         if quality is not None:
             self._quality = quality
         else:
-            self._quality = np.ones_like(rate)
+            self._quality = np.zeros_like(rate)
 
         return self
 
     @property
     def spectrum_hdu(self):
-
         return fits.BinTableHDU.from_columns([
                     fits.Column(name='RATE', array=self._rate, format='1E'),
                     fits.Column(name='STAT_ERR', array=self._stat_err, format='1E'),
@@ -112,6 +111,12 @@ class RMF:
     def from_arrays(energ_lo: float, energ_hi, matrix, e_min, e_max):
         self = RMF()
 
+        c_e = len(energ_lo) == len(energ_hi) == matrix.shape[0]
+        c_eb = len(e_min) == len(e_max) == matrix.shape[1]
+
+        if not c_e or not c_eb:
+            raise Exception("incompatible dimensions!")
+
         self._energ_lo = energ_lo # type: ignore
         self._energ_hi = energ_hi # type: ignore
         self._matrix = matrix # type: ignore
@@ -125,6 +130,11 @@ class RMF:
         return fits.BinTableHDU.from_columns([
                     fits.Column(name='ENERG_LO', array=self._energ_lo, format='1E'),
                     fits.Column(name='ENERG_HI', array=self._energ_hi, format='1E'),
+                    fits.Column(name='N_GRP', array=np.ones_like(self._energ_lo), format='1I'),
+                    fits.Column(name='F_CHAN', array=0*np.ones_like(self._energ_lo), format='1I'),
+                    fits.Column(name='N_CHAN', array=len(self._e_min)*np.ones_like(self._energ_lo), format='1I'),
+                    fits.Column(name='MATRIX', array=self._matrix, format='PE'),
+                    #fits.Column(name='MATRIX', array=self._matrix, format=f'{len(self._e_min)}E'),
                 ],
                 header=fits.Header(cards=dict(
                     # https://heasarc.gsfc.nasa.gov/docs/heasarc/caldb/docs/memos/cal_gen_92_002/cal_gen_92_002.html#tth_sEc7.1.1
@@ -169,6 +179,7 @@ class RMF:
     @property
     def ebounds_hdu(self):
         return fits.BinTableHDU.from_columns([
+                    fits.Column(name='CHANNEL', array=np.arange(self._e_min.shape[0]), format='1I'),
                     fits.Column(name='E_MIN', array=self._e_min, format='1E'),
                     fits.Column(name='E_MAX', array=self._e_max, format='1E'),
                 ],
