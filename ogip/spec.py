@@ -1,6 +1,6 @@
 import logging
-import numpy as np
-import astropy.io.fits as fits
+import numpy as np # type: ignore
+import astropy.io.fits as fits # type: ignore
 
 logger = logging.getLogger()
 
@@ -92,11 +92,11 @@ class RMF:
     def from_arrays(energ_lo: float, energ_hi, matrix, e_min, e_max):
         self = RMF()
 
-        self._energ_lo = energ_lo
-        self._energ_hi = energ_hi
-        self._matrix = matrix
-        self._e_min = e_min
-        self._e_max = e_max
+        self._energ_lo = energ_lo # type: ignore
+        self._energ_hi = energ_hi # type: ignore
+        self._matrix = matrix # type: ignore
+        self._e_min = e_min # type: ignore
+        self._e_max = e_max # type: ignore
 
         return self
 
