@@ -7,8 +7,12 @@ import ogip.spec
 
 logging.basicConfig(level=logging.DEBUG)
 
-def test_read():
-    import ogip.spec
+def test_read_something():
+    import ogip.core
+
+    assert len(ogip.core.open_something("tests/data/phaI.fits.gz"))==1
+
+
 
 def synth_e():
     return (np.logspace(1, 3, 100),

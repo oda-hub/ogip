@@ -4,14 +4,12 @@ import astropy.io.fits as fits # type: ignore
 
 logger = logging.getLogger()
 
-from ogip.core import Reader
 
-class Spectrum(Reader):
+class Spectrum:
 
     @staticmethod
     def from_file_name(fn):
-        c = Spectrum()
-        return c
+        raise NotImplemented
 
     def to_long_string(self):
         return repr(self)
@@ -19,6 +17,21 @@ class Spectrum(Reader):
     ###
 
 class PHAI(Spectrum):
+    @staticmethod
+    def from_file_name_normal(fn):
+        f = fits.open(fn)
+
+        return PHAI.from_arrays(
+                    expsoure=f['SPECTRUM'].header['EXPOSURE'],
+                    rate=f['SPECTRUM'].data['RATE'],
+                    stat_err=f['SPECTRUM'].data['STAT_ERR'],
+                    sys_err=f['SPECTRUM'].data['SYS_ERR'],
+                )
+    
+    @staticmethod
+    def from_file_name(fn):
+        return PHAI.from_file_name_normal(fn)
+
     @staticmethod
     def from_arrays(exposure, rate=None, stat_err=None, sys_err=None, quality=None, counts=None):
         self = PHAI()
@@ -106,6 +119,22 @@ class RMF:
 
     def __init__(self):
         pass
+    
+    @staticmethod
+    def from_file_name_normal(fn):
+        f = fits.open(fn)
+
+        return RMF.from_arrays(
+                    energ_lo=f['MATRIX'].data['ENERG_LO'],
+                    energ_hi=f['MATRIX'].data['ENERG_HI'],
+                    matrix=f['MATRIX'].data['MATRIX'],
+                    e_min=f['EBOUNDS'].data['E_MIN'],
+                    e_max=f['EBOUNDS'].data['E_MAX'],
+                )
+    
+    @staticmethod
+    def from_file_name(fn):
+        return RMF.from_file_name_normal(fn)
 
     @staticmethod
     def from_arrays(energ_lo, energ_hi, matrix, e_min, e_max):
