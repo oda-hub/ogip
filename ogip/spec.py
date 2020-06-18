@@ -108,7 +108,7 @@ class RMF:
         pass
 
     @staticmethod
-    def from_arrays(energ_lo: float, energ_hi, matrix, e_min, e_max):
+    def from_arrays(energ_lo, energ_hi, matrix, e_min, e_max):
         self = RMF()
 
         c_e = len(energ_lo) == len(energ_hi) == matrix.shape[0]
