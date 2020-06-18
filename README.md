@@ -1,8 +1,6 @@
 # Python library to read, write, and validate "OGIP" files
 
-[![Build Status](https://travis-ci.com/volodymyrss/ogip.svg?branch=master)](https://travis-ci.com/volodymyrss/ogip)
-
-[![codecov](https://codecov.io/gh/volodymyrss/ogip/branch/master/graph/badge.svg)](https://codecov.io/gh/volodymyrss/ogip)
+[![Build Status](https://travis-ci.com/volodymyrss/ogip.svg?branch=master)](https://travis-ci.com/volodymyrss/ogip)[![codecov](https://codecov.io/gh/volodymyrss/ogip/branch/master/graph/badge.svg)](https://codecov.io/gh/volodymyrss/ogip)
 
 
 
