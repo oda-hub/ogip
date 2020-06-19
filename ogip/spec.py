@@ -9,7 +9,7 @@ class Spectrum:
 
     @staticmethod
     def from_file_name(fn):
-        raise NotImplemented
+        raise NotImplementedError
 
     def to_long_string(self):
         return repr(self)
@@ -17,6 +17,7 @@ class Spectrum:
     ###
 
 class Readable:
+    @staticmethod
     def from_file_name(cls, fn):
         for n, m in cls.__dict__.items():
             if n.startswith('from_file_name_'):
