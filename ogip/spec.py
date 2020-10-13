@@ -189,11 +189,12 @@ class RMF:
     def from_arrays(energ_lo, energ_hi, matrix, e_min, e_max):
         self = RMF()
 
-        c_e = len(energ_lo) == len(energ_hi) == matrix.shape[0]
-        c_eb = len(e_min) == len(e_max) == matrix.shape[1]
 
-        if not c_e or not c_eb:
-            raise Exception("incompatible dimensions!")
+        if not (len(energ_lo) == len(energ_hi) == matrix.shape[0]):
+            raise Exception(f"incompatible dimensions of mc energy, bounds {len(energ_lo)} {len(energ_hi)} but matrix {matrix.shape[0]}!")
+        
+        if not (len(e_min) == len(e_max) == matrix.shape[1]):
+            raise Exception(f"incompatible dimensions of channel energy, bounds {len(e_min)} {len(e_max)} but matrix {matrix.shape[1]}!")
 
         self._energ_lo = energ_lo # type: ignore
         self._energ_hi = energ_hi # type: ignore
