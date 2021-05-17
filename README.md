@@ -4,7 +4,10 @@
 
 
 
-* aims to support OGIP formats, especially [OGIP/92-007 (Spectral File Format)](https://heasarc.gsfc.nasa.gov/docs/heasarc/ofwg/docs/spectra/ogip_92_007/node5.html) and [OGIP Calibration Memo CAL/GEN/92-002](https://heasarc.gsfc.nasa.gov/docs/heasarc/caldb/docs/memos/cal_gen_92_002/cal_gen_92_002.html)
+* aims to support OGIP formats:
+  * [OGIP/92-007 (The OGIP Spectral File Format)](https://heasarc.gsfc.nasa.gov/docs/heasarc/ofwg/docs/spectra/ogip_92_007/node5.html)
+  * [OGIP Calibration Memo CAL/GEN/92-002 (The Calibration Requirements for Spectral Analysis, Definition of RMF and ARF file formats)](https://heasarc.gsfc.nasa.gov/docs/heasarc/caldb/docs/memos/cal_gen_92_002/cal_gen_92_002.html)
+  * [OGIP Memo OGIP/93-003 (The Proposed Timing FITS File Format for High Energy Astrophysics Data)](https://heasarc.gsfc.nasa.gov/docs/heasarc/ofwg/docs/rates/ogip_93_003/ogip_93_003.html).
 * does not aim to implement the strictest form of the standard, instead trying to understand the content from the least information provided, following [Postel's](https://en.wikipedia.org/wiki/Robustness_principle) [Law](https://tools.ietf.org/html/rfc1122) (which has proven to be successful in TCP). 
 * well-defined, versioned, and provenance-committed process
 * **it just works, always** while it is also **always possible to recover what exactly was done and why**.
