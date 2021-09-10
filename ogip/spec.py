@@ -19,14 +19,16 @@ class Spectrum:
 class Readable:
     @staticmethod
     def from_file_name(cls, fn):
+        methods_tried = {}
         for n, m in cls.__dict__.items():
             if n.startswith('from_file_name_'):
                 try:
                     return m.__func__(fn)
                 except Exception as e:
                     logger.debug("failed to read with %s.%s %s: %s", cls.__name__, n, m, e)
+                    methods_tried[n] = e
 
-        raise Exception("failed to read with any method")
+        raise Exception(f"failed to read with any method, tried: {methods_tried}")
 
 class PHAI(Spectrum):
 
@@ -153,6 +155,13 @@ class PHAII(Spectrum):
 class RMF:
     _telescop="not-a-telescope"
     _instrume="not-an-instrument"
+
+    _energ_lo = None # type: ignore
+    _energ_hi = None # type: ignore
+    _matrix = None # type: ignore
+    _e_min = None # type: ignore
+    _e_max = None # type: ignore
+
     
     def to_long_string(self):
         return f"{self.__class__.__name__}: {len(self._e_min)} x {len(self._energ_lo)}  channels "
@@ -184,6 +193,18 @@ class RMF:
                     e_min=f['EBOUNDS'].data['E_MIN'],
                     e_max=f['EBOUNDS'].data['E_MAX'],
                 )
+
+    @staticmethod
+    def from_file_name_alt_normal(fn):
+        f = fits.open(fn)
+
+        return RMF.from_arrays(
+                    energ_lo=f['SPECRESP MATRIX'].data['ENERG_LO'],
+                    energ_hi=f['SPECRESP MATRIX'].data['ENERG_HI'],
+                    matrix=np.vstack(f['SPECRESP MATRIX'].data['MATRIX']),
+                    e_min=f['EBOUNDS'].data['E_MIN'],
+                    e_max=f['EBOUNDS'].data['E_MAX'],
+                )            
 
     @staticmethod
     def from_arrays(energ_lo, energ_hi, matrix, e_min, e_max):
@@ -289,4 +310,39 @@ class RMF:
             ]).writeto(fn, overwrite=True)
 
 class ARF:
-    pass
+    @staticmethod
+    def from_file_name(fn):
+        return Readable.from_file_name(ARF, fn)
+    
+    @staticmethod
+    def from_file_name_normal(fn):
+        f = fits.open(fn)
+
+        return ARF.from_arrays(
+                    energ_lo=f['SPECRESP'].data['ENERG_LO'],
+                    energ_hi=f['SPECRESP'].data['ENERG_HI'],
+                    arf=f['SPECRESP'].data['SPECRESP'],
+                )
+
+    @staticmethod
+    def from_file_name_osa(fn):
+        f = fits.open(fn)
+
+        return ARF.from_arrays(
+                    energ_lo=f['ISGR-ARF.-RSP'].data['ENERG_LO'],
+                    energ_hi=f['ISGR-ARF.-RSP'].data['ENERG_HI'],
+                    arf=f['ISGR-ARF.-RSP'].data['MATRIX'],
+                )
+
+    @staticmethod
+    def from_arrays(energ_lo, energ_hi, arf):
+        self = ARF()
+
+        if not (len(energ_lo) == len(energ_hi) == len(arf)):
+            raise Exception(f"incompatible dimensions of mc energy, bounds {len(energ_lo)} {len(energ_hi)} but matrix {len(arf)}!")
+        
+        self._energ_lo = energ_lo # type: ignore
+        self._energ_hi = energ_hi # type: ignore
+        self._arf = arf # type: ignore
+
+        return self
