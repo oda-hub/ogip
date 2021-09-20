@@ -69,7 +69,7 @@ def plot(pha: PHAI, model: callable, rmf: RMF, arf: ARF=None, fig=None, label_pr
     plt.xlim([15, 600])
     plt.grid()
 
-def transform_rmf(rmf: RMF, arf: ARF, bias_function: callable, preserved_projection=None) -> RMF:
+def transform_rmf(rmf: RMF, arf: ARF, bias_function: callable, preserved_projection=None, tolerance=0.05) -> RMF:
     new_rmf = RMF.from_arrays(
         energ_lo=bias_function(rmf._energ_lo.copy()),
         energ_hi=bias_function(rmf._energ_hi.copy()),
@@ -87,7 +87,7 @@ def transform_rmf(rmf: RMF, arf: ARF, bias_function: callable, preserved_project
         s = convolve(preserved_projection, rmf, arf) 
         t_s = convolve(preserved_projection, new_rmf, arf)
 
-        assert np.all(np.abs((s - t_s)/s) < 0.001)
+        assert np.all(np.abs((s - t_s)/s) < tolerance)
     
 
     return new_rmf
@@ -103,3 +103,7 @@ def crab_ph_cm2_s_kev(en):
     f[m]=(K*((al1-al2)*Ec/100)**(al1-al2)*(en/100)**al2*np.exp(-(al1-al2)))[m]
 
     return f
+
+def le_bias_function(energy, bias_keV):
+    # TODO: preserves 60 and 511, shifts LE
+    return energy + bias_keV
