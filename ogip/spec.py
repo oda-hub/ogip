@@ -177,7 +177,7 @@ class RMF:
         return RMF.from_arrays(
                     energ_lo=f['ISGR-RMF.-RSP'].data['ENERG_LO'],
                     energ_hi=f['ISGR-RMF.-RSP'].data['ENERG_HI'],
-                    matrix=f['ISGR-RMF.-RSP'].data['MATRIX'],
+                    matrix=np.stack(f['ISGR-RMF.-RSP'].data['MATRIX']),
                     e_min=f['ISGR-EBDS-MOD'].data['E_MIN'],
                     e_max=f['ISGR-EBDS-MOD'].data['E_MAX'],
                 )
@@ -331,7 +331,7 @@ class ARF:
         return ARF.from_arrays(
                     energ_lo=f['ISGR-ARF.-RSP'].data['ENERG_LO'],
                     energ_hi=f['ISGR-ARF.-RSP'].data['ENERG_HI'],
-                    arf=f['ISGR-ARF.-RSP'].data['MATRIX'],
+                    arf=f['ISGR-ARF.-RSP'].data['SPECRESP'],
                 )
 
     @staticmethod
