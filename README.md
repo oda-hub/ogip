@@ -28,7 +28,6 @@ Also, they implement different variations of the standards, and we have a differ
 ## Example
 
 ```python
-# opens a file, detects format
-f = ogip.core.open_something("file.fits")
-f.to_fits('output_file.fits')
+# opens a file, detects format, writes
+ogip.core.open_something("file.fits").to_fits('output_file.fits')
 ```
