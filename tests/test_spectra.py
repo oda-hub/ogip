@@ -11,10 +11,9 @@ def test_read_something():
     import ogip.core
 
     for fn, c in [
-                # ("tests/data/phaI.fits.gz", ogip.spec.PHAI),
-                # ("tests/data/rmf_rt16_116.fits", ogip.spec.RMF),
-                # ("tests/data/rmf.fits.gz", ogip.spec.RMF),
-                ("/home/savchenk/work/integral/spectral_background/ISGRISpectraSum_command_line/rmf_sum_Background.fits", ogip.spec.RMF)
+                ("tests/data/phaI.fits.gz", ogip.spec.PHAI),
+                ("tests/data/rmf_rt16_116.fits", ogip.spec.RMF),
+                ("tests/data/rmf.fits.gz", ogip.spec.RMF),
             ]:
         o = ogip.core.open_something(fn)
         assert isinstance(o, c)
