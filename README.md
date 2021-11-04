@@ -24,3 +24,11 @@ Also, they implement different variations of the standards, and we have a differ
 ## Disadvantages:
 
 * only python, hence slow
+
+## Example
+
+```python
+# opens a file, detects format
+f = ogip.core.open_something("file.fits")
+f.to_fits('output_file.fits')
+```
