@@ -183,6 +183,18 @@ class RMF:
                 )
     
     @staticmethod
+    def from_file_name_osaspi(fn):
+        f = fits.open(fn)
+
+        return RMF.from_arrays(
+                    energ_lo=f['SPI.-RMF.-RSP'].data['ENERG_LO'],
+                    energ_hi=f['SPI.-RMF.-RSP'].data['ENERG_HI'],
+                    matrix=np.stack(f['SPI.-RMF.-RSP'].data['MATRIX']),
+                    e_min=f['SPI.-EBDS-SET'].data['E_MIN'],
+                    e_max=f['SPI.-EBDS-SET'].data['E_MAX'],
+                )
+    
+    @staticmethod
     def from_file_name_normal(fn):
         f = fits.open(fn)
 
