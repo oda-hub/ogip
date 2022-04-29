@@ -358,3 +358,7 @@ class ARF:
         self._arf = arf # type: ignore
 
         return self
+
+    def to_long_string(self):
+        return f"{self.__class__.__name__}: {len(self._arf)} energies {np.max(self._arf)}"
+

@@ -7,7 +7,7 @@ import ogip.spec
 def open_something(fn, allow_many=False):
     options = []
 
-    for c in ogip.spec.PHAI, ogip.spec.RMF:
+    for c in ogip.spec.PHAI, ogip.spec.RMF, ogip.spec.ARF:
         try:
             options.append(c.from_file_name(fn))
             logger.info(f"opened {fn} as {options[-1]}")

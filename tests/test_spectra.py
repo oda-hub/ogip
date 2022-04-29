@@ -7,6 +7,7 @@ import ogip.spec
 
 logging.basicConfig(level=logging.DEBUG)
 
+
 def test_read_something():
     import ogip.core
 
@@ -14,11 +15,11 @@ def test_read_something():
                 ("tests/data/phaI.fits.gz", ogip.spec.PHAI),
                 ("tests/data/rmf_rt16_116.fits", ogip.spec.RMF),
                 ("tests/data/rmf.fits.gz", ogip.spec.RMF),
+                ("tests/data/arf.fits.gz", ogip.spec.ARF),
             ]:
         o = ogip.core.open_something(fn)
         assert isinstance(o, c)
         print(o.to_long_string())
-
 
 
 def synth_e():
