@@ -4,12 +4,12 @@ import numpy as np
 import pytest
 
 import ogip.spec
+import ogip.core
 
 logging.basicConfig(level=logging.DEBUG)
 
 
 def test_read_something():
-    import ogip.core
 
     for fn, c in [
                 ("tests/data/phaI.fits.gz", ogip.spec.PHAI),
@@ -80,3 +80,11 @@ def test_read_xspec():
     s = xspec.Spectrum("phaI.fits")
 
     s.response = "rmf.fits"
+
+
+
+def test_rebin():
+    pha = ogip.core.open_something("tests/data/phaI.fits.gz")
+    rmf = ogip.core.open_something("tests/data/rmf_rt16_116.fits")
+
+    rmf.rebin_log(5, new_e_min=25)

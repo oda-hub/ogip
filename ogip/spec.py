@@ -321,6 +321,36 @@ class RMF:
                 self.matrix_hdu,
             ]).writeto(fn, overwrite=True)
 
+
+    def rebin(self, new_e_bins):
+        new_e_bins_assigned = [{
+            'e_min': self._e_min[0],
+            'e_max': None
+        }]
+
+        # for e1, e2 in zip(self._e_min, self._e_max):
+        #     if e2 < 
+
+
+
+    def rebin_log(self, n_bins_per_decade, new_e_min=None, new_e_max=None):
+        if new_e_min is None:
+            new_e_min = self._e_min[0]
+            logger.info("choosing new e_min: %s", new_e_min)
+    
+        if new_e_max is None:
+            n_bins_in_range = np.ceil(np.log10(self._e_max[-1] / new_e_min) * n_bins_per_decade)
+            new_e_max = new_e_min * 10**(n_bins_in_range/n_bins_per_decade)
+            logger.info("bins in nrange: %s", n_bins_in_range)
+            logger.info("choosing new e_max: %s", new_e_max)
+
+        new_e_bins = np.logspace(np.log10(new_e_min), np.log10(new_e_max), int(np.log10(new_e_max/new_e_min)*n_bins_per_decade))
+
+        logger.info("new e bins: %s", new_e_bins)
+
+        return self.rebin(new_e_bins)
+    
+
 class ARF:
     @staticmethod
     def from_file_name(fn):
