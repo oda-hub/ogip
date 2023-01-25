@@ -5,6 +5,27 @@ import astropy.io.fits as fits # type: ignore
 logger = logging.getLogger()
 
 
+
+def log_bins(n_bins_per_decade, global_e_min, global_e_max):
+    n_bin_edges_per_decade = n_bins_per_decade + 1
+
+    # if new_e_min is None:
+    #     new_e_min = e_min[0]
+    #     logger.info("choosing new e_min: %s", new_e_min)
+
+    # if new_e_max is None:
+    #     n_bins_in_range = np.ceil(np.log10(e_max[-1] / new_e_min) * n_bin_edges_per_decade)
+    #     new_e_max = new_e_min * 10**(n_bins_in_range/n_bin_edges_per_decade)
+    #     logger.info("bins in nrange: %s", n_bins_in_range)
+    #     logger.info("choosing new e_max: %s", new_e_max)
+
+    new_e_bins = np.logspace(np.log10(global_e_min), np.log10(global_e_max), int(np.log10(global_e_max/global_e_min)*n_bin_edges_per_decade))
+
+    logger.debug("new e bins: %s", new_e_bins)
+
+    return new_e_bins
+    
+
 class Spectrum:
 
     @staticmethod
@@ -322,33 +343,46 @@ class RMF:
             ]).writeto(fn, overwrite=True)
 
 
-    def rebin(self, new_e_bins):
-        new_e_bins_assigned = [{
-            'e_min': self._e_min[0],
-            'e_max': None
-        }]
 
-        # for e1, e2 in zip(self._e_min, self._e_max):
-        #     if e2 < 
+def rebin(pha: PHAI, rmf: RMF, new_e_bins) -> (PHAI, RMF):
+    new_e_bins_assigned = []        
+
+    if pha._rate.shape[0] != rmf._matrix[0].shape[0]:
+        raise RuntimeError()
+
+    for new_bin_req_e1, new_bin_req_e2 in zip(new_e_bins[:-1], new_e_bins[1:]):
+        m = rmf._e_min >= new_bin_req_e1
+        m &= rmf._e_min < new_bin_req_e2 # really e_min here
+        
+        new_e_bins_assigned.append(dict(
+            mask=m,
+            matrix_row=rmf._matrix[:, m].sum(1),
+            e_min=np.array(rmf._e_min)[m].min(),
+            e_max=np.array(rmf._e_max)[m].max(),
+            rate=pha._rate[m].sum(),
+            stat_err=np.sum(pha._stat_err[m]**2)**0.5,
+            sys_err=np.sum(pha._sys_err[m]**2)**0.5,
+        ))
+
+        logger.info("for %s - %s new bin assigned: %s", new_bin_req_e1, new_bin_req_e2, {k: v for k, v in new_e_bins_assigned[-1].items() if len(str(v)) < 50})
+
+    return (
+        PHAI.from_arrays(
+            exposure=pha._exposure,
+            rate=np.array([r['rate'] for r in new_e_bins_assigned]),
+            stat_err=np.array([r['stat_err'] for r in new_e_bins_assigned]),
+            sys_err=np.array([r['stat_err'] for r in new_e_bins_assigned]),
+        ),
+        RMF.from_arrays(       
+            energ_lo=rmf._energ_lo.copy(),
+            energ_hi=rmf._energ_hi.copy(),
+            matrix=np.vstack([r['matrix_row'] for r in new_e_bins_assigned]).transpose(),
+            e_min=np.array([r['e_min'] for r in new_e_bins_assigned]),
+            e_max=np.array([r['e_max'] for r in new_e_bins_assigned]),
+        ),
+    )
 
 
-
-    def rebin_log(self, n_bins_per_decade, new_e_min=None, new_e_max=None):
-        if new_e_min is None:
-            new_e_min = self._e_min[0]
-            logger.info("choosing new e_min: %s", new_e_min)
-    
-        if new_e_max is None:
-            n_bins_in_range = np.ceil(np.log10(self._e_max[-1] / new_e_min) * n_bins_per_decade)
-            new_e_max = new_e_min * 10**(n_bins_in_range/n_bins_per_decade)
-            logger.info("bins in nrange: %s", n_bins_in_range)
-            logger.info("choosing new e_max: %s", new_e_max)
-
-        new_e_bins = np.logspace(np.log10(new_e_min), np.log10(new_e_max), int(np.log10(new_e_max/new_e_min)*n_bins_per_decade))
-
-        logger.info("new e bins: %s", new_e_bins)
-
-        return self.rebin(new_e_bins)
     
 
 class ARF:

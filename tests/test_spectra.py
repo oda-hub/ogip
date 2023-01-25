@@ -5,6 +5,8 @@ import pytest
 
 import ogip.spec
 import ogip.core
+import ogip.tools
+from matplotlib import pylab as plt
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -87,4 +89,19 @@ def test_rebin():
     pha = ogip.core.open_something("tests/data/phaI.fits.gz")
     rmf = ogip.core.open_something("tests/data/rmf_rt16_116.fits")
 
-    rmf.rebin_log(5, new_e_min=25)
+    assert isinstance(pha, ogip.spec.PHAI)
+    assert isinstance(rmf, ogip.spec.RMF)
+
+    new_bins = ogip.spec.log_bins(5, 25, 250)
+    rebinned_pha, rebinned_rmf = ogip.spec.rebin(pha, rmf, new_bins)
+    
+    assert rebinned_rmf._matrix.shape == (2466, 5)
+    assert rebinned_pha._rate.shape == (5,)    
+
+    f = plt.figure()
+    ogip.tools.plot(pha, lambda x:x, rmf, fig=f)
+    ogip.tools.plot(rebinned_pha, lambda x:x, rebinned_rmf, fig=f)
+    plt.savefig("png.png")
+
+
+    
