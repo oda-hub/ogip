@@ -67,6 +67,7 @@ class PHAI(Spectrum):
                             rate=e.data['RATE'],
                             stat_err=e.data['STAT_ERR'],
                             sys_err=e.data['SYS_ERR'],
+                            filename=fn
                         )
             except Exception as ex:
                 logger.debug("failed to read from %s: %s", e, ex)
@@ -81,14 +82,16 @@ class PHAI(Spectrum):
                     rate=f['SPECTRUM'].data['RATE'],
                     stat_err=f['SPECTRUM'].data['STAT_ERR'],
                     sys_err=f['SPECTRUM'].data['SYS_ERR'],
+                    filename=fn
                 )
     
 
 
     @staticmethod
-    def from_arrays(exposure, rate=None, stat_err=None, sys_err=None, quality=None, counts=None):
+    def from_arrays(exposure, rate=None, stat_err=None, sys_err=None, quality=None, counts=None, filename=None):
         self = PHAI()
 
+        self.filename = filename
         self._exposure = exposure
 
         if counts is not None:
