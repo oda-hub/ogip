@@ -14,7 +14,7 @@ def convolve(source_model: callable, rmf: RMF, arf: ARF=None):
 
     return (np.outer(_arf * source_model(ie1)*(ie2-ie1),np.ones_like(e1))*rmf._matrix).sum(0)
 
-def plot(pha: PHAI, model: callable, rmf: RMF, arf: ARF=None, fig=None, label_prefix=None, plot_kwargs={}):
+def plot(pha: PHAI, model: callable, rmf: RMF, arf: ARF=None, fig=None, label_prefix=None, plot_kwargs={}, unfolded=False, e_power=0):
     import matplotlib as mpl
     mpl.use('Agg')
     import matplotlib.pylab as plt
@@ -35,18 +35,30 @@ def plot(pha: PHAI, model: callable, rmf: RMF, arf: ARF=None, fig=None, label_pr
     if fig is None:
         plt.figure(figsize=(15,10))
 
-    plt.step(
-        e1,
-        model_spec/(e2 - e1),
-        where='post',
-        label=prefix("model"),
-        **plot_kwargs
-    )
+
+    if unfolded:
+        ice = (ie1 + ie2) / 2
+        plt.plot(ice, model(ice) * ice**e_power)
+    else:
+        plt.step(
+            e1,
+            model_spec/(e2 - e1),
+            where='post',
+            label=prefix("model"),
+            **plot_kwargs
+        )
     
     if pha is not None:
+        ce = (e1 + e2) / 2
+
+        if unfolded:
+            unfolding_factor = model(e1) / model_spec * ce**e_power
+        else:
+            unfolding_factor = 1
+
         x = plt.step(
             e1,
-            pha._rate/(e2 - e1),
+            pha._rate/(e2 - e1) * unfolding_factor,
             where='post',
             label=prefix("data"),
             **plot_kwargs
@@ -54,8 +66,8 @@ def plot(pha: PHAI, model: callable, rmf: RMF, arf: ARF=None, fig=None, label_pr
                 
         plt.errorbar(
             (e1 * e2)**0.5,
-            pha._rate/(e2 - e1),
-            pha._stat_err/(e2 - e1),
+            pha._rate/(e2 - e1) * unfolding_factor,
+            pha._stat_err/(e2 - e1) * unfolding_factor,
             ls="",
             c=x[0].get_color(),
             **plot_kwargs
