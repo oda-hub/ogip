@@ -1,7 +1,12 @@
+from typing import Callable, Optional, Tuple
 import numpy as np
+
+import scipy
+import scipy.stats
+
 from ogip.spec import PHAI, RMF, ARF
 
-def convolve(source_model: callable, rmf: RMF, arf: ARF=None):
+def convolve(source_model: Callable, rmf: RMF, arf: Optional[ARF]=None):
     ie1 = rmf._energ_lo
     ie2 = rmf._energ_hi
     e1 = rmf._e_min
@@ -14,7 +19,36 @@ def convolve(source_model: callable, rmf: RMF, arf: ARF=None):
 
     return (np.outer(_arf * source_model(ie1)*(ie2-ie1),np.ones_like(e1))*rmf._matrix).sum(0)
 
-def plot(pha: PHAI, model: callable, rmf: RMF, arf: ARF=None, fig=None, label_prefix=None, plot_kwargs={}, unfolded=False, e_power=0):
+
+# def get_unfolding_factor(pha: PHAI, model: Callable, rmf: RMF, arf: Optional[ARF]=None) -> Tuple[np.ndarray, np.ndarray]:    
+def get_unfolding_factor(model: Callable, rmf: RMF, arf: Optional[ARF]=None) -> Tuple[np.ndarray, np.ndarray]:    
+    model_spec = convolve(model, rmf, arf)
+
+    e1 = rmf._e_min
+    e2 = rmf._e_max
+    ce = (e1 + e2) / 2
+
+    return model(e1) / model_spec * rmf.d_e_c
+
+
+def get_loglike(pha: PHAI, model: Callable, rmf: RMF, arf: Optional[ARF]=None, mask=None):
+    convolved = convolve(model, rmf, arf)
+
+    if mask is None:
+        mask = np.ones_like(convolved, dtype=bool)
+
+    return np.sum(scipy.stats.norm(convolved, pha._stat_err).logcdf(pha._rate)[mask])
+
+
+def get_mloglike(*args, **kwargs):
+    return -1 * get_loglike(*args, **kwargs)
+
+
+def synthesise(pha: PHAI, model: Callable, rmf: RMF, arf: Optional[ARF]=None):
+    return scipy.stats.norm(convolve(model, rmf, arf), pha._stat_err).rvs()
+
+
+def plot(pha: PHAI, model: Callable, rmf: RMF, arf: Optional[ARF]=None, fig=None, label_prefix=None, plot_kwargs={}, unfolded=False, e_power=0):
     import matplotlib as mpl
     mpl.use('Agg')
     import matplotlib.pylab as plt
@@ -23,6 +57,8 @@ def plot(pha: PHAI, model: callable, rmf: RMF, arf: ARF=None, fig=None, label_pr
     ie2 = rmf._energ_hi
     e1 = rmf._e_min
     e2 = rmf._e_max
+
+    ce = (e1 + e2) / 2
 
     model_spec = convolve(model, rmf, arf)
 
@@ -49,23 +85,21 @@ def plot(pha: PHAI, model: callable, rmf: RMF, arf: ARF=None, fig=None, label_pr
         )
     
     if pha is not None:
-        ce = (e1 + e2) / 2
-
         if unfolded:
-            unfolding_factor = model(e1) / model_spec * ce**e_power
+            unfolding_factor = get_unfolding_factor(model, rmf, arf)
         else:
             unfolding_factor = 1
 
         x = plt.step(
-            e1,
+            ce,
             pha._rate/(e2 - e1) * unfolding_factor,
-            where='post',
+            where='mid',
             label=prefix("data"),
             **plot_kwargs
         )
                 
         plt.errorbar(
-            (e1 * e2)**0.5,
+            ce,
             pha._rate/(e2 - e1) * unfolding_factor,
             pha._stat_err/(e2 - e1) * unfolding_factor,
             ls="",
@@ -73,13 +107,12 @@ def plot(pha: PHAI, model: callable, rmf: RMF, arf: ARF=None, fig=None, label_pr
             **plot_kwargs
         )
 
-
     plt.legend()     
     plt.loglog()
-    
-        
+            
     plt.xlim([15, 600])
     plt.grid()
+
 
 def transform_rmf(rmf: RMF, arf: ARF, bias_function: callable, preserved_projection=None, tolerance=0.05) -> RMF:
     new_rmf = RMF.from_arrays(

@@ -345,6 +345,14 @@ class RMF:
                 self.matrix_hdu,
             ]).writeto(fn, overwrite=True)
 
+    @property
+    def d_e_c(self):
+        return self._e_max - self._e_min
+
+    @property
+    def d_e(self):
+        return self._energ_hi - self._energ_lo
+
 
 
 def rebin(pha: PHAI, rmf: RMF, new_e_bins) -> (PHAI, RMF):
@@ -384,6 +392,7 @@ def rebin(pha: PHAI, rmf: RMF, new_e_bins) -> (PHAI, RMF):
             e_max=np.array([r['e_max'] for r in new_e_bins_assigned]),
         ),
     )
+
 
 
     

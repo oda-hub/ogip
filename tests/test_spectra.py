@@ -103,5 +103,53 @@ def test_rebin():
     ogip.tools.plot(rebinned_pha, lambda x:x, rebinned_rmf, fig=f)
     plt.savefig("png.png")
 
+    
+def test_unfolding():
+    import scipy.stats
+
+    pha = ogip.core.open_something("tests/data/phaI.fits.gz")
+    rmf = ogip.core.open_something("tests/data/rmf_rt16_116.fits")
+
+    assert isinstance(pha, ogip.spec.PHAI)
+    assert isinstance(rmf, ogip.spec.RMF)
+
+    model = lambda energy, N, p:(N*(energy/50)**p)
+    ref_model = lambda x:model(x, 1e-2, -2)
+
+    f = plt.figure()
+    
+    pha._stat_err = pha._stat_err*50
+    pha._rate = ogip.tools.synthesise(pha, ref_model, rmf)
+    
+    plt.plot(rmf._e_min, pha._rate / rmf.d_e_c)
+    
+    model_spec = ogip.tools.convolve(ref_model, rmf)
+    plt.plot(rmf._e_min, model_spec / rmf.d_e_c)    
+    
+    ll = ogip.tools.get_mloglike(pha, ref_model, rmf, mask=(rmf._e_min > 50) & (rmf._e_min < 100))
+    
+
+    ogip.tools.plot(pha, ref_model, rmf, fig=f, unfolded=False)
+    plt.title(f"-loglike = {ll}")
+
+    plt.figure()
+
+    ref_model(rmf._energ_lo)
+
+    plt.plot(rmf._energ_lo, ref_model(rmf._energ_lo))
+
+    plt.plot(rmf._e_min, 
+             pha._rate / model_spec * ref_model(rmf._e_min))
+
+    plt.plot(rmf._e_min, 
+             pha._rate / rmf.d_e_c * ogip.tools.get_unfolding_factor(ref_model, rmf))
 
     
+    plt.loglog()
+
+    ogip.tools.plot(pha, ref_model, rmf, fig=f, unfolded=True)
+    
+    # TODO: check that it all looks the same
+
+    plt.savefig("png.png")
+
