@@ -92,7 +92,7 @@ def plot(pha: PHAI, model: Callable, rmf: RMF, arf: Optional[ARF]=None, fig=None
 
         x = plt.step(
             ce,
-            pha._rate/(e2 - e1) * unfolding_factor,
+            pha._rate/(e2 - e1) * unfolding_factor * ce**e_power,
             where='mid',
             label=prefix("data"),
             **plot_kwargs
@@ -100,8 +100,8 @@ def plot(pha: PHAI, model: Callable, rmf: RMF, arf: Optional[ARF]=None, fig=None
                 
         plt.errorbar(
             ce,
-            pha._rate/(e2 - e1) * unfolding_factor,
-            pha._stat_err/(e2 - e1) * unfolding_factor,
+            pha._rate/(e2 - e1) * unfolding_factor * ce**e_power,
+            pha._stat_err/(e2 - e1) * unfolding_factor * ce**e_power,
             ls="",
             c=x[0].get_color(),
             **plot_kwargs
