@@ -3,6 +3,7 @@ import numpy as np
 
 import scipy
 import scipy.stats
+import scipy.optimize
 
 from ogip.spec import PHAI, RMF, ARF
 
@@ -20,6 +21,13 @@ def convolve(source_model: Callable, rmf: RMF, arf: Optional[ARF]=None):
     return (np.outer(_arf * source_model(ie1)*(ie2-ie1),np.ones_like(e1))*rmf._matrix).sum(0)
 
 
+def fit(source_model_generator: Callable, p0: list, pha: PHAI, rmf: RMF, arf: Optional[ARF]=None, mask=None, method='COBYLA'):
+    r = scipy.optimize.minimize(
+        lambda p: get_mloglike(pha, source_model_generator(p), rmf=rmf, arf=arf, mask=mask), 
+        p0,
+        method=method)
+    return r, source_model_generator(r.x)
+
 # def get_unfolding_factor(pha: PHAI, model: Callable, rmf: RMF, arf: Optional[ARF]=None) -> Tuple[np.ndarray, np.ndarray]:    
 def get_unfolding_factor(model: Callable, rmf: RMF, arf: Optional[ARF]=None) -> Tuple[np.ndarray, np.ndarray]:    
     model_spec = convolve(model, rmf, arf)
@@ -36,8 +44,8 @@ def get_loglike(pha: PHAI, model: Callable, rmf: RMF, arf: Optional[ARF]=None, m
 
     if mask is None:
         mask = np.ones_like(convolved, dtype=bool)
-
-    return np.sum(scipy.stats.norm(convolved, pha._stat_err).logcdf(pha._rate)[mask])
+    
+    return np.sum(scipy.stats.norm(convolved, pha._stat_err).logpdf(pha._rate)[mask])
 
 
 def get_mloglike(*args, **kwargs):

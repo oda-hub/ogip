@@ -113,24 +113,48 @@ def test_unfolding():
     assert isinstance(pha, ogip.spec.PHAI)
     assert isinstance(rmf, ogip.spec.RMF)
 
-    model = lambda energy, N, p:(N*(energy/50)**p)
-    ref_model = lambda x:model(x, 1e-2, -2)
+    def model_gen(p):
+        print("test", p)
+        return lambda energy:(p[0]*(energy/50)**p[1])
 
-    f = plt.figure()
-    
+    ref_model = model_gen((1e-2, -2))
+
     pha._stat_err = pha._stat_err*50
     pha._rate = ogip.tools.synthesise(pha, ref_model, rmf)
+
+    mask = (rmf._e_min > 50) & (rmf._e_min < 100)
+    
+    r, f_model = ogip.tools.fit(model_gen, [0.5e-2, -3], pha, rmf, mask=mask)
+
+    print(r, f_model)
+    
+    f = plt.figure()
+    
+    
+    plt.plot(rmf._e_min, pha._rate / rmf.d_e_c)
+    
+    model_spec = ogip.tools.convolve(ref_model, rmf)
+    plt.plot(rmf._e_min, model_spec / rmf.d_e_c, label="ref")    
+
+    model_spec = ogip.tools.convolve(f_model, rmf)
+    plt.plot(rmf._e_min, model_spec / rmf.d_e_c, label="fitted")    
     
     plt.plot(rmf._e_min, pha._rate / rmf.d_e_c)
     
     model_spec = ogip.tools.convolve(ref_model, rmf)
     plt.plot(rmf._e_min, model_spec / rmf.d_e_c)    
     
-    ll = ogip.tools.get_mloglike(pha, ref_model, rmf, mask=(rmf._e_min > 50) & (rmf._e_min < 100))
+    ll = ogip.tools.get_mloglike(pha, ref_model, rmf, mask=mask)
     
 
-    ogip.tools.plot(pha, ref_model, rmf, fig=f, unfolded=False)
-    plt.title(f"-loglike = {ll}")
+    # ogip.tools.plot(pha, ref_model, rmf, fig=f, unfolded=False)
+    plt.title(f"-loglike = {ll} {r}")
+
+    # ogip.tools.plot(pha, ref_model, rmf, fig=f, unfolded=False)
+
+    plt.loglog()
+
+    plt.savefig("png.png")
 
     plt.figure()
 
@@ -151,5 +175,5 @@ def test_unfolding():
     
     # TODO: check that it all looks the same
 
-    plt.savefig("png.png")
+    plt.savefig("unf_png.png")
 
