@@ -8,17 +8,12 @@ import scipy.optimize
 from ogip.spec import PHAI, RMF, ARF
 
 def convolve(source_model: Callable, rmf: RMF, arf: Optional[ARF]=None):
-    ie1 = rmf._energ_lo
-    ie2 = rmf._energ_hi
-    e1 = rmf._e_min
-    e2 = rmf._e_max
-    
     if arf is None:
-        _arf = np.ones_like(ie1)
+        _arf = np.ones_like(rmf.c_energ)
     else:
         _arf = arf._arf    
 
-    return (np.outer(_arf * source_model(ie1)*(ie2-ie1),np.ones_like(e1))*rmf._matrix).sum(0)
+    return (np.outer(_arf * source_model(rmf.c_energ)*rmf.d_energ,np.ones_like(rmf._e_min))*rmf._matrix).sum(0)
 
 
 def fit(source_model_generator: Callable, p0: list, pha: PHAI, rmf: RMF, arf: Optional[ARF]=None, mask=None, method='COBYLA'):
@@ -34,9 +29,8 @@ def get_unfolding_factor(model: Callable, rmf: RMF, arf: Optional[ARF]=None) -> 
 
     e1 = rmf._e_min
     e2 = rmf._e_max
-    ce = (e1 + e2) / 2
-
-    return model(e1) / model_spec * rmf.d_e_c
+    
+    return model(e1) / model_spec * rmf.d_e
 
 
 def get_loglike(pha: PHAI, model: Callable, rmf: RMF, arf: Optional[ARF]=None, mask=None):
@@ -56,7 +50,8 @@ def synthesise(pha: PHAI, model: Callable, rmf: RMF, arf: Optional[ARF]=None):
     return scipy.stats.norm(convolve(model, rmf, arf), pha._stat_err).rvs()
 
 
-def plot(pha: PHAI, model: Callable, rmf: RMF, arf: Optional[ARF]=None, fig=None, label_prefix=None, plot_kwargs={}, unfolded=False, e_power=0):
+def plot(pha: PHAI, model: Callable, rmf: RMF, arf: Optional[ARF]=None, 
+         fig=None, label_prefix=None, plot_kwargs={}, unfolded=False, e_power=0, step=False):
     import matplotlib as mpl
     mpl.use('Agg')
     import matplotlib.pylab as plt
@@ -65,9 +60,7 @@ def plot(pha: PHAI, model: Callable, rmf: RMF, arf: Optional[ARF]=None, fig=None
     ie2 = rmf._energ_hi
     e1 = rmf._e_min
     e2 = rmf._e_max
-
-    ce = (e1 + e2) / 2
-
+    
     model_spec = convolve(model, rmf, arf)
 
     def prefix(l):
@@ -80,13 +73,12 @@ def plot(pha: PHAI, model: Callable, rmf: RMF, arf: Optional[ARF]=None, fig=None
         plt.figure(figsize=(15,10))
 
 
-    if unfolded:
-        ice = (ie1 + ie2) / 2
-        plt.plot(ice, model(ice) * ice**e_power)
+    if unfolded:        
+        plt.plot(rmf.c_energ, model(rmf.c_energ) * rmf.c_energ**e_power)
     else:
         plt.step(
             e1,
-            model_spec/(e2 - e1),
+            model_spec/rmf.d_e,
             where='post',
             label=prefix("model"),
             **plot_kwargs
@@ -98,20 +90,25 @@ def plot(pha: PHAI, model: Callable, rmf: RMF, arf: Optional[ARF]=None, fig=None
         else:
             unfolding_factor = 1
 
-        x = plt.step(
-            ce,
-            pha._rate/(e2 - e1) * unfolding_factor * ce**e_power,
-            where='mid',
-            label=prefix("data"),
-            **plot_kwargs
-        )
-                
+        if step:
+            x = plt.step(
+                rmf.c_e,
+                pha._rate/rmf.d_e * unfolding_factor * rmf.c_e**e_power,
+                where='mid',
+                label=prefix("data"),
+                **plot_kwargs
+            )
+            color = x[0].get_color()
+        else:
+            color = None
+                    
         plt.errorbar(
-            ce,
-            pha._rate/(e2 - e1) * unfolding_factor * ce**e_power,
-            pha._stat_err/(e2 - e1) * unfolding_factor * ce**e_power,
+            rmf.c_e,
+            pha._rate/rmf.d_e * unfolding_factor * rmf.c_e**e_power,
+            pha._stat_err/rmf.d_e * unfolding_factor * rmf.c_e**e_power,
+            xerr=rmf.d_e/2,
             ls="",
-            c=x[0].get_color(),
+            c=color,
             **plot_kwargs
         )
 
@@ -122,7 +119,7 @@ def plot(pha: PHAI, model: Callable, rmf: RMF, arf: Optional[ARF]=None, fig=None
     plt.grid()
 
 
-def transform_rmf(rmf: RMF, arf: ARF, bias_function: callable, preserved_projection=None, tolerance=0.05) -> RMF:
+def transform_rmf(rmf: RMF, arf: ARF, bias_function: Callable, preserved_projection=None, tolerance=0.05) -> RMF:
     new_rmf = RMF.from_arrays(
         energ_lo=bias_function(rmf._energ_lo.copy()),
         energ_hi=bias_function(rmf._energ_hi.copy()),

@@ -131,18 +131,18 @@ def test_unfolding():
     f = plt.figure()
     
     
-    plt.plot(rmf._e_min, pha._rate / rmf.d_e_c)
+    plt.plot(rmf._e_min, pha._rate / rmf.d_e)
     
     model_spec = ogip.tools.convolve(ref_model, rmf)
-    plt.plot(rmf._e_min, model_spec / rmf.d_e_c, label="ref")    
+    plt.plot(rmf._e_min, model_spec / rmf.d_e, label="ref")    
 
     model_spec = ogip.tools.convolve(f_model, rmf)
-    plt.plot(rmf._e_min, model_spec / rmf.d_e_c, label="fitted")    
+    plt.plot(rmf._e_min, model_spec / rmf.d_e, label="fitted")    
     
-    plt.plot(rmf._e_min, pha._rate / rmf.d_e_c)
+    plt.plot(rmf._e_min, pha._rate / rmf.d_e)
     
     model_spec = ogip.tools.convolve(ref_model, rmf)
-    plt.plot(rmf._e_min, model_spec / rmf.d_e_c)    
+    plt.plot(rmf._e_min, model_spec / rmf.d_e)    
     
     ll = ogip.tools.get_mloglike(pha, ref_model, rmf, mask=mask)
     
@@ -166,7 +166,7 @@ def test_unfolding():
              pha._rate / model_spec * ref_model(rmf._e_min))
 
     plt.plot(rmf._e_min, 
-             pha._rate / rmf.d_e_c * ogip.tools.get_unfolding_factor(ref_model, rmf))
+             pha._rate / rmf.d_e * ogip.tools.get_unfolding_factor(ref_model, rmf))
 
     
     plt.loglog()

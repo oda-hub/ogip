@@ -52,6 +52,13 @@ class Readable:
         raise Exception(f"failed to read with any method, tried: {methods_tried}")
 
 class PHAI(Spectrum):
+    _rate = None
+    _sys_err = None
+    _stat_err = None
+    _quality = None
+
+    filename = None
+    _exposure = None
 
     @staticmethod
     def from_file_name(fn):
@@ -346,12 +353,20 @@ class RMF:
             ]).writeto(fn, overwrite=True)
 
     @property
-    def d_e_c(self):
+    def d_e(self):
         return self._e_max - self._e_min
 
     @property
-    def d_e(self):
+    def d_energ(self):
         return self._energ_hi - self._energ_lo
+
+    @property
+    def c_e(self):
+        return (self._e_max + self._e_min)/2
+
+    @property
+    def c_energ(self):
+        return (self._energ_hi + self._energ_lo)/2
 
 
 
@@ -398,6 +413,8 @@ def rebin(pha: PHAI, rmf: RMF, new_e_bins) -> (PHAI, RMF):
     
 
 class ARF:
+    _arf = None
+
     @staticmethod
     def from_file_name(fn):
         return Readable.from_file_name(ARF, fn)
