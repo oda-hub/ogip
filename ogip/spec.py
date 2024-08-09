@@ -83,12 +83,37 @@ class PHAI(Spectrum):
 
     @staticmethod
     def from_file_name_normal(fn):
+        
         f = fits.open(fn)
+        if 'RATE' in f['SPECTRUM'].data.names:
+            rate = f['SPECTRUM'].data['RATE']
+        elif 'COUNTS' in f['SPECTRUM'].data.names:
+            rate = f['SPECTRUM'].data['COUNTS'] / f['SPECTRUM'].header['EXPOSURE']
+        else:
+            rate = None
+
+        if 'STAT_ERR' in f['SPECTRUM'].data.names:
+            stat_err = f['SPECTRUM'].data['STAT_ERR']
+        elif 'POISSERR' in f['SPECTRUM'].header and f['SPECTRUM'].header['POISSERR']:
+            if 'COUNTS' in f['SPECTRUM'].data.names:
+                stat_err = np.sqrt(f['SPECTRUM'].data['COUNTS']) / f['SPECTRUM'].header['EXPOSURE']
+            elif 'RATE' in f['SPECTRUM'].data.names:
+                stat_err = np.sqrt(f['SPECTRUM'].data['RATE'] * f['SPECTRUM'].header['EXPOSURE'])/f['SPECTRUM'].header['EXPOSURE']
+            else:
+                stat_err = None
+        else:
+            stat_err= None
+
+        if 'SYS_ERR' in f['SPECTRUM'].data.names:
+            sys_err = f['SPECTRUM'].data['SYS_ERR']
+        else:
+            sys_err = None
+
         return PHAI.from_arrays(
                     exposure=f['SPECTRUM'].header['EXPOSURE'],
-                    rate=f['SPECTRUM'].data['RATE'],
-                    stat_err=f['SPECTRUM'].data['STAT_ERR'],
-                    sys_err=f['SPECTRUM'].data['SYS_ERR'],
+                    rate=rate,
+                    stat_err = stat_err,
+                    sys_err=sys_err,
                     filename=fn
                 )
     
