@@ -33,6 +33,19 @@ single_time_definition_keywords = ['MJDREF',
                                    'TIMEREF',
                                    'TIMEDEL']
 
+optional_keywords = ['DATE-OBS' , 'DATE-END',
+                                      'TELESCOP', 
+                                      'INSTRUME', 
+                                      'FILTER',
+                                      'OBJECT',
+                                      'RA',
+                                      'DEC',
+                                      'EQUINOX',
+                                      'RADECSYS',
+                                      'ORIGIN',
+                                      'DATE',
+                                      'AUTHOR']
+
 
 class rate(LightCurve):
     _time = None
@@ -62,7 +75,7 @@ class rate(LightCurve):
     
     def read_keywords(self, hdu):
          
-        for kk in single_time_definition_keywords:
+        for kk in single_time_definition_keywords + optional_keywords:
             if kk in hdu.header:
                 self._keywords[kk] = hdu.header[kk]
                 logger.debug(f'Updating {kk}')
@@ -181,13 +194,23 @@ class rate(LightCurve):
                                       TELESCOP="", # - the "telescope" (i.e. mission/satellite name).
                                       INSTRUME="", #- the instrument/detector.
                                       FILTER="", #- the instrument filter in use (if any)
-                                      OBJECT="", #
                                       HDUCLASS="OGIP", # - should contain the string "OGIP" to indicate that this is an OGIP style file.
-                                      HDUCLAS1="LIGHT CURVE", # - 
-                                      HDUVERS="1.2.1", #- the version number of the format (this document describes version 1.2.1)
+                                      HDUCLAS1="LIGHT CURVE", # -
+                                      HDUCLAS2="RATE", # -
                                       TIMVERSN= 'OGIP/93-003', #OGIP memo number where the convention used
-                                      #POISSERR #- whether Poissonian errors are appropriate to the data (see below).
+                                      OBJECT  = '', #   / name of the observed object
+                                      RA      = '', #                  / source right ascension in degree 
+                                      DEC     = '', #                   / source declination in degree 
+            # RA--NOM =                    / r.a. nominal pointing in degree
+            # DEC--NOM=                    / dec. nominal pointing in degree
+                                      EQUINOX = 2000.0, #             / equinox for ra and dec
+                                      RADECSYS= 'FK5',#              / world coord. system for this file (FK5 or FK4)
+                                      ORIGIN  = '',#         / who produced the fits file
+                                      DATE    = '', #         / when the fits file was created
+                                      AUTHOR  = '',   #  /name of program that produced this file
                                       ))
+        for kk in ['DATE-OBS' , 'DATE-END']:
+            header[kk] = ''
         for kk, vv in self._keywords:
             header[kk] = vv
 
