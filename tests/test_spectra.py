@@ -124,7 +124,7 @@ def test_unfolding():
 
     mask = (rmf._e_min > 50) & (rmf._e_min < 100)
     
-    r, f_model = ogip.tools.fit(model_gen, [0.5e-2, -3], pha, rmf, mask=mask)
+    r, f_model = ogip.tools.fit(model_gen, [0.5e-2, -3], [(pha, rmf, None, mask)])
 
     print(r, f_model)
     

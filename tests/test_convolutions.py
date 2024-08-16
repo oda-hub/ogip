@@ -10,6 +10,7 @@ from matplotlib import pyplot as plt
 logging.basicConfig(level=logging.DEBUG)
 
 
+@pytest.mark.skipif(not os.path.exists("crab_arf.fits"), reason="no test files")
 def test_crab_fit(crab_spectra):
     crab_pha_fn, crab_rmf_fn, crab_arf_fn = crab_spectra
     
