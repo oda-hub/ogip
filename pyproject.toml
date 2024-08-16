@@ -17,6 +17,7 @@ pylint = {version = "^3.2.6", extras = ["testing"]}
 emcee = {version = "^3.1.6", extras = ["tools"]}
 scipy = {version = "^1.14.0", extras = ["tools"]}
 matplotlib = {version = "^3.9.2", extras = ["plot"]}
+coverage = "^7.6.1"
 
 
 

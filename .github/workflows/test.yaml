@@ -25,6 +25,7 @@ jobs:
         run: |  
           python -m pip install --upgrade pip  
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi  
+          pip install '.[testing]'
 
       - name: wemake-python-styleguide
         uses: wemake-services/wemake-python-styleguide@0.19.2
