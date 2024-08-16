@@ -1,8 +1,8 @@
+import ogip.spec
 import logging
 
-logger=logging.getLogger()
+logger = logging.getLogger()
 
-import ogip.spec
 
 def open_something(fn, allow_many=False):
     options = []
@@ -19,6 +19,3 @@ def open_something(fn, allow_many=False):
     else:
         if len(options) > 0:
             return options[0]
-
-
-

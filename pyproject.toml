@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "ogip"
+version = "0.1.0"
+description = ""
+authors = ["Volodymyr Savchenko <Volodymyr.Savchenko@epfl.ch>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+numpy = "^2.0.1"
+astropy = "^6.1.2"
+click = "^8.1.7"
+
+pytest = {extras = ["testing"], version = ">=4.6"}
+mypy = {version = "^1.11.1", extras = ["testing"]}
+pylint = {version = "^3.2.6", extras = ["testing"]}
+emcee = {version = "^3.1.6", extras = ["tools"]}
+scipy = {version = "^1.14.0", extras = ["tools"]}
+matplotlib = {version = "^3.9.2", extras = ["plot"]}
+coverage = "^7.6.1"
+
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[project.scripts]
+ogip = "ogip.cli:cli"
