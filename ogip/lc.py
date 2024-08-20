@@ -49,7 +49,7 @@ optional_keywords = ['TELAPSE',
                     'CREATOR']
 
 
-class rate(LightCurve):
+class Rate(LightCurve):
     _time = None
     _timedel = None
     _fracexp = None
