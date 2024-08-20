@@ -1,6 +1,6 @@
 import logging
-import numpy as np # type: ignore
-import astropy.io.fits as fits # type: ignore
+import numpy as np  # type: ignore
+import astropy.io.fits as fits  # type: ignore
 
 logger = logging.getLogger()
 
@@ -15,46 +15,49 @@ class LightCurve:
 
     ###
 
-double_time_definition_keywords = [ ('MJDREFI', 'MJDREFF'), 
+
+double_time_definition_keywords = [('MJDREFI', 'MJDREFF'),
                                     ('TSTARTI', 'TSTARTF'),
                                     ('TSTOPI', 'TSTOPF'),
                                     ('TIMEZERI', 'TIMEZERF'),
-                                    ]
+                                   ]
 
 single_time_definition_keywords = ['MJDREF',
                                     'TSTART',
                                     'TSTOP',
                                     'TIMEZERO',
                                     'TIMEUNIT',
-                                   'TIMEDEL',
+                                    'TIMEDEL',
                                    ]
 
 optional_keywords = ['TELAPSE',
-                    'TIMEREF',                     
+                     'TIMEREF',
                      'TIMESYS', 
                      'CLOCKCOR', 
                      'DATE-OBS' , 
                      'DATE-END',
-                    'TELESCOP', 
-                    'INSTRUME', 
-                    'FILTER',
-                    'OBJECT',
-                    'RA',
-                    'DEC',
-                    'EQUINOX',
-                    'RADECSYS',
-                    'ORIGIN',
-                    'DATE',
-                    'AUTHOR'
-                    'CREATOR']
+                     'TELESCOP',
+                     'INSTRUME',
+                     'FILTER',
+                     'OBJECT',
+                     'RA',
+                     'DEC',
+                     'EQUINOX',
+                     'RADECSYS',
+                     'ORIGIN',
+                     'DATE',
+                     'AUTHOR'
+                     'CREATOR'
+                     ]
 
 
 class Rate(LightCurve):
     _time = None
+    _rate = None
+    _error = None
     _timedel = None
     _fracexp = None
     _keywords = {}
-
     _filename = None
 
     def __init__(self, filename):
@@ -63,7 +66,7 @@ class Rate(LightCurve):
 
         methods_tried= {}
         issue = True
-        for n, m in rate.__dict__.items():
+        for n, m in Rate.__dict__.items():
             
             if n.startswith('from_file_name_'):
                 try:
@@ -128,10 +131,10 @@ class Rate(LightCurve):
             self._time = hdu.data['TIME']
         else:
             logger.warning("No time column, use keywords")
-            self._time = np.linspace(self._keywords['TSTART'],self._keywords['TSTOP'], 
+            self._time = np.arange(self._keywords['TSTART'],self._keywords['TSTOP'],
                                       self._keywords['TIMEDEL']  )
         
-        #char read_dx = 0; //check if need to read TIMEDEL, 0 no read dx, 1 read TIMEDEL keyword, 2 read XAX_E (ignoring TIMEDEL keyword
+        #char read_dx = 0; //check if you need to read TIMEDEL, 0 no read dx, 1 read TIMEDEL keyword, 2 read XAX_E (ignoring TIMEDEL keyword
         if 'XAX_E' in hdu.data.names:
             self._timedel = hdu.data['XAX_E'] * 2
         elif 'TIMEDEL' in hdu.data.names:
@@ -233,6 +236,7 @@ class Rate(LightCurve):
         return np.nansum(self._rate)
 
     def to_long_string(self):
-        return f"{self.__class__.__name__}: exposure {self._exposure} s, total count/s {self.total_counts}, {len(self._rate)} channels "
+        elapsed_time = self._time[-1] - self._time[0]
+        return f"{self.__class__.__name__}: elapsed time {elapsed_time} s, total count/s {self.total_counts}, {len(self._rate)} bins "
 
 
