@@ -13,7 +13,7 @@ def test_read_write():
         "tests/data/JMX1_lc_Swift_J151857.0-572147_3-10.fits"]
 
     for fn in files:
-        lc = ogip.lc.rate(fn)
+        lc = ogip.lc.Rate(fn)
         k = fn.rfind('.')
         new_fn = fn[0:k] + '_ogip.' + fn[k+1:]
         lc.to_fits(new_fn)
