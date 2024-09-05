@@ -171,3 +171,14 @@ def test_unfolding():
     # TODO: check that it all looks the same
 
     plt.savefig("unf_png.png")
+
+def test_read_poisson():
+    import ogip.spec
+    pha = ogip.spec.PHAI.from_file_name("tests/data/MOS1source_spectrum_150_rbn.pi")
+    from astropy.io import fits as pf
+    import numpy as np
+    ff = pf.open("tests/data/MOS1source_spectrum_150_rbn.pi")
+    counts = ff[1].data['COUNTS']
+
+    assert(np.abs(np.sum(counts - (pha._rate)*pha._exposure)) < 1e-12)
+    assert(np.sum(pha._rate*pha._exposure - (pha._stat_err*pha._exposure)**2))
