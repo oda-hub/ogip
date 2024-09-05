@@ -172,6 +172,7 @@ def test_unfolding():
 
     plt.savefig("unf_png.png")
 
+
 def test_read_poisson():
     import ogip.spec
     pha = ogip.spec.PHAI.from_file_name("tests/data/MOS1source_spectrum_150_rbn.pi")
