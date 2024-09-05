@@ -168,7 +168,7 @@ class PHAI(Spectrum):
             self._quality = quality
         else:
             self._quality = np.zeros_like(rate)
-        
+
         if grouping is not None:
             self._grouping = grouping
         else:
