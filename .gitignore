@@ -3,3 +3,5 @@ build
 .vscode
 dist
 *.egg-info
+.idea
+.ipynb_checkpoints
