@@ -76,17 +76,50 @@ class PHAI(Spectrum):
             except Exception as ex:
                 logger.debug("failed to read from %s: %s", e, ex)
 
-        raise Exception("unable to read from any extension")
+        raise Exception("unable to read from any extension in OSA")
 
     @staticmethod
     def from_file_name_normal(fn):
+        logger.debug('Reading OGIP format')
+
         f = fits.open(fn)
+
+        exposure = f['SPECTRUM'].header['EXPOSURE']
+        if 'RATE' in f['SPECTRUM'].data.names:
+            rate = f['SPECTRUM'].data['RATE']
+        elif 'COUNTS' in f['SPECTRUM'].data.names:
+            rate = f['SPECTRUM'].data['COUNTS'] / exposure
+        else:
+            rate = None
+
+        if 'STAT_ERR' in f['SPECTRUM'].data.names:
+            stat_err = f['SPECTRUM'].data['STAT_ERR']
+        elif f['SPECTRUM'].header.get('POISSERR', False):
+            logger.debug('Reading Poissonian uncertainties')
+            if 'COUNTS' in f['SPECTRUM'].data.names:
+                stat_err = np.sqrt(f['SPECTRUM'].data['COUNTS']) / exposure
+            else:
+                stat_err = None
+        else:
+            stat_err = None
+
+        if 'SYS_ERR' in f['SPECTRUM'].data.names:
+            sys_err = f['SPECTRUM'].data['SYS_ERR']
+        else:
+            sys_err = None
+
+        if 'GROUPING' in f['SPECTRUM'].data.names:
+            grouping = f['SPECTRUM'].data['GROUPING']
+        else:
+            grouping = None
+
         return PHAI.from_arrays(
-            exposure=f["SPECTRUM"].header["EXPOSURE"],
-            rate=f["SPECTRUM"].data["RATE"],
-            stat_err=f["SPECTRUM"].data["STAT_ERR"],
-            sys_err=f["SPECTRUM"].data["SYS_ERR"],
+            exposure=exposure,
+            rate=rate,
+            stat_err=stat_err,
+            sys_err=sys_err,
             filename=fn,
+            grouping=grouping
         )
 
     @staticmethod
@@ -98,6 +131,7 @@ class PHAI(Spectrum):
         quality=None,
         counts=None,
         filename=None,
+        grouping=None
     ):
         self = PHAI()
 
@@ -134,6 +168,11 @@ class PHAI(Spectrum):
             self._quality = quality
         else:
             self._quality = np.zeros_like(rate)
+
+        if grouping is not None:
+            self._grouping = grouping
+        else:
+            self._grouping = np.zeros_like(rate)
 
         return self
 
