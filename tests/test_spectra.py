@@ -181,5 +181,5 @@ def test_read_poisson():
     ff = pf.open("tests/data/MOS1source_spectrum_150_rbn.pi")
     counts = ff[1].data['COUNTS']
 
-    assert(np.abs(np.sum(counts - (pha._rate)*pha._exposure)) < 1e-12)
-    assert(np.sum(pha._rate*pha._exposure - (pha._stat_err*pha._exposure)**2))
+    assert (np.abs(np.sum(counts - (pha._rate) * pha._exposure)) < 1e-12)
+    assert (np.sum(pha._rate * pha._exposure - (pha._stat_err * pha._exposure)**2))
