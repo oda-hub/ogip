@@ -263,7 +263,7 @@ class RMF:
 
     @staticmethod
     def from_file_name_osaisgri(fn):
-        f = fits.open(fn)
+        f = fits.open(fn, mode='readonly')
 
         return RMF.from_arrays(
             energ_lo=f["ISGR-RMF.-RSP"].data["ENERG_LO"],
@@ -275,7 +275,7 @@ class RMF:
 
     @staticmethod
     def from_file_name_osaspi(fn):
-        f = fits.open(fn)
+        f = fits.open(fn, mode='readonly')
 
         return RMF.from_arrays(
             energ_lo=f["SPI.-RMF.-RSP"].data["ENERG_LO"],
@@ -287,7 +287,7 @@ class RMF:
 
     @staticmethod
     def from_file_name_normal(fn):
-        f = fits.open(fn)
+        f = fits.open(fn, mode='readonly')
 
         return RMF.from_arrays(
             energ_lo=f["MATRIX"].data["ENERG_LO"],
@@ -299,7 +299,7 @@ class RMF:
 
     @staticmethod
     def from_file_name_alt_normal(fn):
-        f = fits.open(fn)
+        f = fits.open(fn, mode='readonly')
 
         return RMF.from_arrays(
             energ_lo=f["SPECRESP MATRIX"].data["ENERG_LO"],
@@ -443,8 +443,8 @@ class RMF:
         fits.HDUList(
             [
                 fits.PrimaryHDU(),
-                self.ebounds_hdu,
                 self.matrix_hdu,
+                self.ebounds_hdu,
             ]
         ).writeto(fn, overwrite=True)
 
