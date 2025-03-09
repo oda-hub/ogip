@@ -301,30 +301,45 @@ def plot(
 
 
 def transform_rmf(
-    rmf: RMF,
-    arf: ARF,
+    rmf,
+    arf,
     bias_function: Callable,
     preserved_projection=None,
     tolerance=0.05,
 ) -> RMF:
-    new_rmf = RMF.from_arrays(
-        energ_lo=bias_function(rmf._energ_lo.copy()),
-        energ_hi=bias_function(rmf._energ_hi.copy()),
-        e_min=rmf._e_min.copy(),
-        e_max=rmf._e_max.copy(),
-        matrix=rmf._matrix.copy(),
-    )
+    
+    if isinstance(rmf, str):
+        new_rmf = RMF.from_file_name(rmf)
+        # print('Pre type', type(new_rmf._energ_lo))
+        new_rmf._energ_lo=bias_function(new_rmf._energ_lo.copy())
+        new_rmf._energ_hi=bias_function(new_rmf._energ_hi.copy())
+        local_rmf = RMF.from_file_name(rmf)
+    else:
+        new_rmf = RMF.from_arrays(
+            energ_lo=bias_function(rmf._energ_lo.copy()),
+            energ_hi=bias_function(rmf._energ_hi.copy()),
+            e_min=rmf._e_min.copy(),
+            e_max=rmf._e_max.copy(),
+            matrix=rmf._matrix.copy(),
+        )
+        local_rmf = rmf
+        
+    
+    if isinstance(arf, str):
+        local_arf = ARF.from_file_name(arf)
+    else:
+        local_arf= arf
 
     if preserved_projection is not None:
         # projection on model should be preserved
-        corr = convolve(preserved_projection, new_rmf, arf) / convolve(
-            preserved_projection, rmf, arf
+        corr = convolve(preserved_projection, new_rmf, local_arf) / convolve(
+            preserved_projection, local_rmf, local_arf
         )
 
         new_rmf._matrix /= np.outer(np.ones_like(new_rmf._energ_lo), corr)
 
-        s = convolve(preserved_projection, rmf, arf)
-        t_s = convolve(preserved_projection, new_rmf, arf)
+        s = convolve(preserved_projection, local_rmf, local_arf)
+        t_s = convolve(preserved_projection, new_rmf, local_arf)
 
         assert np.all(np.abs((s - t_s) / s) < tolerance)
 
